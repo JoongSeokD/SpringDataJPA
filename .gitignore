@@ -30,3 +30,8 @@ out/
 
 ### VS Code ###
 .vscode/
+/gradlew
+/gradlew.bat
+/HELP.md
+/settings.gradle
+/gradle/
