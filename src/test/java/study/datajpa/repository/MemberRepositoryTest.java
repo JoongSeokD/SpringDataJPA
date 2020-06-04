@@ -4,6 +4,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
@@ -137,6 +141,90 @@ class MemberRepositoryTest {
         for (Member byName : byNames) {
             System.out.println("byName = " + byName);
         }
+    }
+
+    @Test
+    void paging() throws Exception {
+        //given
+        Member m1 = new Member("member1", 10);
+        Member m2 = new Member("member2", 10);
+        Member m3 = new Member("member3", 10);
+        Member m4 = new Member("member4", 10);
+        Member m5 = new Member("member5", 10);
+        Member m6 = new Member("member6", 10);
+        Member m7 = new Member("member7", 10);
+        Member m8 = new Member("member8", 10);
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+        memberRepository.save(m3);
+        memberRepository.save(m4);
+        memberRepository.save(m5);
+        memberRepository.save(m6);
+        memberRepository.save(m7);
+        memberRepository.save(m8);
+
+        PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.DEFAULT_DIRECTION.DESC, "username"));
+
+        int age = 10;
+
+        //when
+        Page<Member> page = memberRepository.findByAge(age, pageRequest);
+
+        Page<MemberDto> memberDtos = page.map(member -> new MemberDto(member.getId(), member.getUsername(), null));
+
+        //then
+        List<Member> pageContent = page.getContent();
+        long totalElements = page.getTotalElements();
+        for (Member member : pageContent) {
+            System.out.println("member = " + member);
+        }
+        System.out.println("totalElements = " + totalElements);
+
+        assertEquals(pageContent.size(), 3);
+        assertEquals(totalElements, 8);
+        assertEquals(page.getNumber(), 0);
+        assertEquals(page.getTotalPages(), 3);
+        assertEquals(page.isFirst(), true);
+        assertEquals(page.hasNext(), true);
+
+    }
+    @Test
+    void slice() throws Exception {
+        //given
+        Member m1 = new Member("member1", 10);
+        Member m2 = new Member("member2", 10);
+        Member m3 = new Member("member3", 10);
+        Member m4 = new Member("member4", 10);
+        Member m5 = new Member("member5", 10);
+        Member m6 = new Member("member6", 10);
+        Member m7 = new Member("member7", 10);
+        Member m8 = new Member("member8", 10);
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+        memberRepository.save(m3);
+        memberRepository.save(m4);
+        memberRepository.save(m5);
+        memberRepository.save(m6);
+        memberRepository.save(m7);
+        memberRepository.save(m8);
+
+        PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.DEFAULT_DIRECTION.DESC, "username"));
+
+        int age = 10;
+
+        //when
+        Slice<Member> slice = memberRepository.findSliceByAge(age, pageRequest);
+
+        //then
+        List<Member> pageContent = slice.getContent();
+        for (Member member : pageContent) {
+            System.out.println("member = " + member);
+        }
+
+        assertEquals(pageContent.size(), 3);
+        assertEquals(slice.getNumber(), 0);
+        assertEquals(slice.isFirst(), true);
+        assertEquals(slice.hasNext(), true);
 
     }
 
