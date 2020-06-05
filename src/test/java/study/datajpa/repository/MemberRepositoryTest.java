@@ -300,5 +300,13 @@ class MemberRepositoryTest {
         //then
     }
 
+    @Test
+    void custom() throws Exception {
+        //given
+        List<Member> memberCustom = memberRepository.findMemberCustom();
+        //when
+
+        //then
+    }
 
 }
