@@ -13,6 +13,8 @@ import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
 import study.datajpa.entity.Team;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +27,8 @@ class MemberRepositoryTest {
 
     @Autowired MemberRepository memberRepository;
     @Autowired TeamRepository teamRepository;
+    @PersistenceContext
+    EntityManager em;
 
     @Test
     @DisplayName(value = "멤버테스트")
@@ -226,6 +230,30 @@ class MemberRepositoryTest {
         assertEquals(slice.isFirst(), true);
         assertEquals(slice.hasNext(), true);
 
+    }
+
+    @Test
+    void bulkUpdate() throws Exception {
+        //given
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 19));
+        memberRepository.save(new Member("member3", 20));
+        memberRepository.save(new Member("member4", 21));
+        memberRepository.save(new Member("member5", 40));
+        //when
+        int resultCount = memberRepository.bulkAgePlus(20);
+//        em.clear();
+
+        // 벌크 연산시 주의 점 (벌크 연산은 영속성 컨텍스트관리와 상관업이 그냥 DB에 쿼리를 날리기 때문에) 
+        // 영속성 컨텍스트가 관리하는 엔티티들은 아직 업데이트가 되어있지 않음
+        // 그래서 영속성 컨텍스트를 초기화 시켜야함
+        // 1. em.clear()
+        // 2. @Modifying(clearAutomatically = true)
+        List<Member> result = memberRepository.findByNames(Arrays.asList("member5"));
+        Member member5 = result.get(0);
+        System.out.println("member5.getAge() = " + member5.getAge());
+        //then
+        assertEquals(resultCount, 3);
     }
 
 
